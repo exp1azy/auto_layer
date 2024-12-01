@@ -1,0 +1,32 @@
+[
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Add",
+    "RelativePath": "WeatherForecast/add",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Remove",
+    "RelativePath": "WeatherForecast/remove",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Update",
+    "RelativePath": "WeatherForecast/update",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

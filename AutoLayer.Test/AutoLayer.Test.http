@@ -1,0 +1,6 @@
+@AutoLayer.Test_HostAddress = http://localhost:5174
+
+GET {{AutoLayer.Test_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
