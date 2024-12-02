@@ -9,9 +9,9 @@ namespace AutoLayer.Test.Controllers
         private readonly MyService _myService = myService;
 
         [HttpGet("add")]
-        public IActionResult Add()
+        public async Task<IActionResult> Add()
         {
-            _myService.Add();
+            await _myService.AddAsync();
             return Ok();
         }
 

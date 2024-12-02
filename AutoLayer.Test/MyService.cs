@@ -9,7 +9,7 @@ namespace AutoLayer.Test
 
         public void Add()
         {
-            var data = _generator.GenerateList<WeatherForecast>();
+            var data = _generator.GenerateList<WeatherForecast>(1000);
             data.ForEach((w) =>
             {
                 w.Id = 0;
