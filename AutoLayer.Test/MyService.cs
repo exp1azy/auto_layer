@@ -7,7 +7,7 @@ namespace AutoLayer.Test
         private readonly Repository<WeatherForecast> _repo = new(context);
         private readonly Generator _generator = new();
 
-        public void Add()
+        public async Task AddAsync()
         {
             var data = _generator.GenerateList<WeatherForecast>(1000);
             data.ForEach((w) =>
@@ -17,12 +17,12 @@ namespace AutoLayer.Test
                 w.TemperatureF = 32 + (int)(w.TemperatureC / 0.5556);
             });
 
-            _repo.AddRange(data);
+            await _repo.AddRangeAsync(data);
         }
 
-        public void Update()
+        public async Task UpdateAsync()
         {
-            var data = _repo.GetAll();
+            var data = await _repo.GetAllAsync();
             var entity = data.First();
             entity.Date = DateOnly.FromDateTime(DateTime.Now);
             entity.TemperatureC = 1;

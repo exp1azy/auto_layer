@@ -88,6 +88,15 @@ namespace AutoLayer.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Page number and page size must be greater than 0..
+        /// </summary>
+        internal static string GetPageError {
+            get {
+                return ResourceManager.GetString("GetPageError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Failed to convert &apos;{0}&apos; model to &apos;{1}&apos; entity - properties differ..
         /// </summary>
         internal static string ModelToEntityError {

@@ -126,6 +126,9 @@
   <data name="ExecuteSqlRawError" xml:space="preserve">
     <value>Failed to execute sql query: {0}</value>
   </data>
+  <data name="GetPageError" xml:space="preserve">
+    <value>Page number and page size must be greater than 0.</value>
+  </data>
   <data name="ModelToEntityError" xml:space="preserve">
     <value>Failed to convert '{0}' model to '{1}' entity - properties differ.</value>
   </data>

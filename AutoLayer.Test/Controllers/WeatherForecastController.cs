@@ -14,19 +14,5 @@ namespace AutoLayer.Test.Controllers
             await _myService.AddAsync();
             return Ok();
         }
-
-        [HttpGet("update")]
-        public IActionResult Update()
-        {
-            _myService.Update();
-            return Ok();
-        }
-
-        [HttpGet("remove")]
-        public IActionResult Remove()
-        {
-            _myService.Remove();
-            return Ok();
-        }
     }
 }

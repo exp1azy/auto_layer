@@ -32,13 +32,12 @@ namespace AutoLayer
         #region Async
         public Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         public Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default);
-        public Task<IEnumerable<TEntity>> GetWhereAsync(Func<TEntity, bool> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
-        public Task<bool> ExistsAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
         public Task<int> CountAsync(CancellationToken cancellationToken = default);
-        public Task<int> CountWhereAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default);
-        public Task<IQueryable<TEntity>> GetQueryAsync(CancellationToken cancellationToken = default);
-        public Task<IEnumerable<TEntity>> GetOrderedAsync(Func<TEntity, bool> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
-        public Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Func<TEntity, bool>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<int> CountWhereAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, bool>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, bool>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
         public Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken = default);
         public Task AddRangeAsync(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default);
         public Task UpdateAsync(TEntity updatedEntity, CancellationToken cancellationToken = default);

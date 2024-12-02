@@ -386,87 +386,49 @@ namespace AutoLayer
             return await _dbContext.Database.ExecuteSqlRawAsync(sqlQuery, cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetWhereAsync(Func<TEntity, bool> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
-            IEnumerable<TEntity> result = default!;
+            var query = asNoTracking
+                ? _dbContext.Set<TEntity>().AsNoTracking().Where(predicate)
+                : _dbContext.Set<TEntity>().Where(predicate);
 
-            await Task.Run(() =>
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, bool>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            var query = _dbContext.Set<TEntity>().AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            query = isAscending
+                ? query.OrderBy(orderBy)
+                : query.OrderByDescending(orderBy);
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, bool>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            if (pageNumber <= 0 || pageSize <= 0)
+                throw new GetPageException(Error.GetPageError);
+
+            var query = _dbContext.Set<TEntity>().AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (orderBy != null)
             {
-                result = asNoTracking ?
-                [.. _dbContext.Set<TEntity>().AsNoTracking().Where(predicate)] :
-                [.. _dbContext.Set<TEntity>().Where(predicate)];
-            }, cancellationToken);
-            
-            return result;
-        }
+                query = (IQueryable<TEntity>)(isAscending
+                    ? query.OrderBy(orderBy)
+                    : query.OrderByDescending(orderBy));
+            }
 
-        public async Task<bool> ExistsAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default)
-        {
-            bool result = default!;
-            await Task.Run(() => result = _dbContext.Set<TEntity>().Any(predicate), cancellationToken);
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
 
-            return result;
-        }
-
-        public async Task<int> CountWhereAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default)
-        {
-            int result = default!;
-            await Task.Run(() => result = _dbContext.Set<TEntity>().Count(predicate), cancellationToken);
-
-            return result;
-        }
-
-        public async Task<IQueryable<TEntity>> GetQueryAsync(CancellationToken cancellationToken = default)
-        {
-            IQueryable<TEntity> result = default!;
-            await Task.Run(() => result = _dbContext.Set<TEntity>().AsQueryable(), cancellationToken);
-
-            return result;
-        }
-
-        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Func<TEntity, bool> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            IEnumerable<TEntity> result = default!;
-
-            await Task.Run(() =>
-            {
-                var entities = _dbContext.Set<TEntity>().AsQueryable();
-
-                if (asNoTracking)
-                    entities = entities.AsNoTracking();
-
-                result = isAscending ?
-                    [.. entities.OrderBy(orderBy)] :
-                    [.. entities.OrderByDescending(orderBy)];
-            }, cancellationToken);
-
-            return result;
-        }
-
-        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Func<TEntity, bool>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            IEnumerable<TEntity> result = default!;
-
-            await Task.Run(() =>
-            {
-                var entities = _dbContext.Set<TEntity>().AsQueryable();
-
-                if (asNoTracking)
-                    entities = entities.AsNoTracking();
-
-                if (orderBy != null)
-                {
-                    result = isAscending ?
-                        [.. entities.OrderBy(orderBy).Skip((pageNumber - 1) * pageSize).Take(pageSize)] :
-                        [.. entities.OrderByDescending(orderBy).Skip((pageNumber - 1) * pageSize).Take(pageSize)];
-                }
-
-                result = isAscending ?
-                    [.. entities.Skip((pageNumber - 1) * pageSize).Take(pageSize)] :
-                    [.. entities.OrderByDescending(x => x).Skip((pageNumber - 1) * pageSize).Take(pageSize)];
-            }, cancellationToken);
-
-            return result;
+            return await query.ToListAsync(cancellationToken);
         }
         #endregion
     }
