@@ -7,36 +7,58 @@ namespace AutoLayer
     {
         public static TModel MapToModel<TModel>(object entity) where TModel : class, new()
         {
-            var modelType = typeof(TModel);
-            var entityType = entity.GetType();
+            if (entity == null)
+                throw new NullEntityException(nameof(entity));
 
-            var modelLength = modelType.GetProperties().Length;
-            var entityLength = entityType.GetProperties().Length;
+            var model = new TModel();
+            var modelProperties = typeof(TModel).GetProperties();
+            var entityProperties = entity.GetType().GetProperties();
 
-            if (modelLength != entityLength)
-                throw new MapException(Error.EntityToModelError, entity.GetType().Name, modelType.Name);
+            foreach (var modelProperty in modelProperties)
+            {
+                var entityProperty = entityProperties.FirstOrDefault(p => p.Name == modelProperty.Name) 
+                    ?? throw new MapException(Error.EntityToModelError, entity.GetType().Name, typeof(TModel).Name);
 
-            for (int i = 0; i < modelLength; i++)           
-                modelType.GetProperties()[i].SetValue(entity, entityType.GetProperties()[i].GetValue(entity));
+                if (modelProperty.PropertyType.IsAssignableFrom(entityProperty.PropertyType))
+                {
+                    var value = entityProperty.GetValue(entity);
+                    modelProperty.SetValue(model, value);
+                }
+                else
+                {
+                    throw new MapException(Error.EntityToModelError, entityProperty.Name, entityProperty.PropertyType.Name, modelProperty.PropertyType.Name);
+                }
+            }
 
-            return (TModel)(object)modelType;
+            return model;
         }
 
         public static TEntity MapToEntity<TEntity>(object model) where TEntity : class, new()
         {
-            var entityType = typeof(TEntity);
-            var modelType = model.GetType();
+            if (model == null)
+                throw new NullEntityException(nameof(model));
 
-            var entityLength = entityType.GetProperties().Length;
-            var modelLength = modelType.GetProperties().Length;
+            var entity = new TEntity();
+            var entityProperties = typeof(TEntity).GetProperties();
+            var modelProperties = model.GetType().GetProperties();
 
-            if (entityLength != modelLength)
-                throw new MapException(Error.ModelToEntityError, modelType.GetType().Name, entityType.Name);
+            foreach (var entityProperty in entityProperties)
+            {
+                var modelProperty = modelProperties.FirstOrDefault(p => p.Name == entityProperty.Name) 
+                    ?? throw new MapException(Error.ModelToEntityError, model.GetType().Name, typeof(TEntity).Name);
 
-            for (int i = 0; i < entityLength; i++)           
-                entityType.GetProperties()[i].SetValue(model, modelType.GetProperties()[i].GetValue(model));
+                if (entityProperty.PropertyType.IsAssignableFrom(modelProperty.PropertyType))
+                {
+                    var value = modelProperty.GetValue(model);
+                    entityProperty.SetValue(entity, value);
+                }
+                else
+                {
+                    throw new MapException(Error.ModelToEntityError, modelProperty.Name, modelProperty.PropertyType.Name, entityProperty.PropertyType.Name);
+                }
+            }
 
-            return (TEntity)(object)entityType;
+            return entity;
         }
     }
 }

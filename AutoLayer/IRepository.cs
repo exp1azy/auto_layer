@@ -12,8 +12,8 @@ namespace AutoLayer
         public int Count();
         public int CountWhere(Func<TEntity, bool> predicate);
         public IQueryable<TEntity> GetQuery();
-        public IEnumerable<TEntity> GetOrdered(Func<TEntity, bool> orderBy, bool isAscending = true, bool asNoTracking = true);
-        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, bool>? orderBy = null, bool isAscending = true, bool asNoTracking = true);
+        public IEnumerable<TEntity> GetOrdered(Func<TEntity, object> orderBy, bool isAscending = true, bool asNoTracking = true);
+        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, object>? orderBy = null, bool isAscending = true, bool asNoTracking = true);
         public void Add(TEntity entityToAdd);
         public void AddRange(IEnumerable<TEntity> entitiesToAdd);
         public void Update(TEntity entityToUpdate);
@@ -36,8 +36,8 @@ namespace AutoLayer
         public Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
         public Task<int> CountAsync(CancellationToken cancellationToken = default);
         public Task<int> CountWhereAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
-        public Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, bool>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
-        public Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, bool>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default);
         public Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken = default);
         public Task AddRangeAsync(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default);
         public Task UpdateAsync(TEntity updatedEntity, CancellationToken cancellationToken = default);
@@ -51,7 +51,6 @@ namespace AutoLayer
         public Task ExecuteTransactionAsync(Func<Task> action, CancellationToken cancellationToken = default);
         public Task<IEnumerable<TEntity>> ExecuteSqlRawAsync(string sqlQuery, CancellationToken cancellationToken = default);
         public Task<int> ExecuteSqlRawCommandAsync(string sqlQuery, CancellationToken cancellationToken = default);
-
         #endregion
     }
 }

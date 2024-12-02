@@ -133,6 +133,15 @@ namespace AutoLayer.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Primary key values cannot be null..
+        /// </summary>
+        internal static string NullPrimaryKeyError {
+            get {
+                return ResourceManager.GetString("NullPrimaryKeyError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на SQL query cannot be null..
         /// </summary>
         internal static string NullSqlQueryError {

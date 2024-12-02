@@ -52,7 +52,7 @@ namespace AutoLayer
             return _dbContext.Set<TEntity>().AsQueryable();
         }
 
-        public IEnumerable<TEntity> GetOrdered(Func<TEntity, bool> orderBy, bool isAscending = true, bool asNoTracking = true)
+        public IEnumerable<TEntity> GetOrdered(Func<TEntity, object> orderBy, bool isAscending = true, bool asNoTracking = true)
         {
             var entities = _dbContext.Set<TEntity>().AsQueryable();
 
@@ -64,8 +64,11 @@ namespace AutoLayer
                 [.. entities.OrderByDescending(orderBy)];
         }
 
-        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, bool>? orderBy = null, bool isAscending = true, bool asNoTracking = true)
+        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, object>? orderBy = null, bool isAscending = true, bool asNoTracking = true)
         {
+            if (pageNumber <= 0 || pageSize <= 0)
+                throw new GetPageException(Error.GetPageError);
+
             var entities = _dbContext.Set<TEntity>().AsQueryable();
 
             if (asNoTracking)
@@ -111,7 +114,16 @@ namespace AutoLayer
             if (entityToUpdate == null)
                 throw new NullEntityException(Error.NullEntityError, nameof(entityToUpdate));
 
-            var entity = _dbContext.Set<TEntity>().Find(entityToUpdate) 
+            var keyValues = _dbContext.Model.FindEntityType(typeof(TEntity))?
+                .FindPrimaryKey()?
+                .Properties
+                .Select(p => p.PropertyInfo?.GetValue(entityToUpdate))
+                .ToArray();
+
+            if (keyValues == null || keyValues.Any(k => k == null))
+                throw new NullPrimaryKeyException(Error.NullPrimaryKeyError, nameof(entityToUpdate));
+
+            var entity = _dbContext.Set<TEntity>().Find(keyValues)
                 ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToUpdate));
 
             _dbContext.Entry(entity).CurrentValues.SetValues(entityToUpdate);
@@ -133,10 +145,36 @@ namespace AutoLayer
 
         public void UpdateRange(IEnumerable<TEntity> entitiesToUpdate)
         {
-            if (entitiesToUpdate == null || entitiesToUpdate.Any(x => x == null))
+            if (entitiesToUpdate == null || !entitiesToUpdate.Any())
                 throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToUpdate));
 
-            _dbContext.Set<TEntity>().UpdateRange(entitiesToUpdate);
+            if (entitiesToUpdate.Any(x => x == null))
+                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToUpdate));
+
+            var primaryKeyProperties = _dbContext.Model.FindEntityType(typeof(TEntity))?
+                .FindPrimaryKey()?
+                .Properties
+                .Select(p => p.PropertyInfo)
+                .ToArray();
+
+            if (primaryKeyProperties == null || primaryKeyProperties.Length == 0)
+                throw new InvalidOperationException($"Entity {typeof(TEntity).Name} does not have a primary key defined.");
+
+            foreach (var entity in entitiesToUpdate)
+            {
+                var keyValues = primaryKeyProperties
+                    .Select(p => p.GetValue(entity))
+                    .ToArray();
+
+                if (keyValues.Any(k => k == null))
+                    throw new ArgumentException("Primary key values cannot be null", nameof(entitiesToUpdate));
+
+                var existingEntity = _dbContext.Set<TEntity>().Find(keyValues)
+                    ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entity));
+
+                _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+            }
+
             _dbContext.SaveChanges();
         }
 
@@ -256,7 +294,7 @@ namespace AutoLayer
         public async Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken = default)
         {
             if (entityToAdd == null)
-                throw new NullEntityException(Error.NullEntityError, nameof(entityToAdd));
+                throw new NullEntityException(Error.NullEntityError, typeof(TEntity).Name);
 
             await _dbContext.Set<TEntity>().AddAsync(entityToAdd, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -265,7 +303,7 @@ namespace AutoLayer
         public async Task AddRangeAsync(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default)
         {
             if (entitiesToAdd == null || entitiesToAdd.Any(x => x == null))
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToAdd));
+                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, typeof(TEntity).Name);
 
             await _dbContext.Set<TEntity>().AddRangeAsync(entitiesToAdd, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -274,10 +312,19 @@ namespace AutoLayer
         public async Task UpdateAsync(TEntity entityToUpdate, CancellationToken cancellationToken = default)
         {
             if (entityToUpdate == null)
-                throw new NullEntityException(Error.NullEntityError, nameof(entityToUpdate));
+                throw new NullEntityException(Error.NullEntityError, typeof(TEntity).Name);
 
-            var entity = await _dbContext.Set<TEntity>().FindAsync([ entityToUpdate ], cancellationToken: cancellationToken)
-                ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToUpdate));
+            var keyValues = _dbContext.Model.FindEntityType(typeof(TEntity))?
+                .FindPrimaryKey()?
+                .Properties
+                .Select(p => p.PropertyInfo?.GetValue(entityToUpdate))
+                .ToArray();
+
+            if (keyValues == null || keyValues.Any(k => k == null))
+                throw new NullPrimaryKeyException(Error.NullPrimaryKeyError, typeof(TEntity).Name);
+
+            var entity = await _dbContext.Set<TEntity>().FindAsync(keyValues, cancellationToken)
+                ?? throw new EntityNotFoundException(Error.EntityNotFoundError, typeof(TEntity).Name);
 
             _dbContext.Entry(entity).CurrentValues.SetValues(entityToUpdate);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -288,9 +335,8 @@ namespace AutoLayer
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
 
-            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken);
-            if (entityToUpdate == null)
-                throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToUpdate));
+            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken) 
+                ?? throw new EntityNotFoundException(Error.EntityNotFoundError, typeof(TEntity).Name);
 
             updateAction(entityToUpdate);
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -298,10 +344,36 @@ namespace AutoLayer
 
         public async Task UpdateRangeAsync(IEnumerable<TEntity> entitiesToUpdate, CancellationToken cancellationToken = default)
         {
-            if (entitiesToUpdate == null || entitiesToUpdate.Any(x => x == null))
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToUpdate));
+            if (entitiesToUpdate == null || !entitiesToUpdate.Any())
+                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, typeof(IEnumerable<TEntity>).Name);
 
-            _dbContext.Set<TEntity>().UpdateRange(entitiesToUpdate);
+            if (entitiesToUpdate.Any(x => x == null))
+                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, typeof(IEnumerable<TEntity>).Name);
+
+            var primaryKeyProperties = _dbContext.Model.FindEntityType(typeof(TEntity))?
+                .FindPrimaryKey()?
+                .Properties
+                .Select(p => p.PropertyInfo)
+                .ToArray();
+
+            if (primaryKeyProperties == null || primaryKeyProperties.Length == 0)
+                throw new NullPrimaryKeyException(Error.NullPrimaryKeyError, typeof(IEnumerable<TEntity>).Name);
+
+            foreach (var entity in entitiesToUpdate)
+            {
+                var keyValues = primaryKeyProperties
+                    .Select(p => p.GetValue(entity))
+                    .ToArray();
+
+                if (keyValues.Any(k => k == null))
+                    throw new ArgumentException("Primary key values cannot be null", typeof(IEnumerable<TEntity>).Name);
+
+                var existingEntity = await _dbContext.Set<TEntity>().FindAsync(keyValues, cancellationToken) 
+                    ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entity));
+
+                _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
+            }
+
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
@@ -395,7 +467,7 @@ namespace AutoLayer
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, bool>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
             var query = _dbContext.Set<TEntity>().AsQueryable();
 
@@ -409,7 +481,7 @@ namespace AutoLayer
             return await query.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, bool>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
             if (pageNumber <= 0 || pageSize <= 0)
                 throw new GetPageException(Error.GetPageError);

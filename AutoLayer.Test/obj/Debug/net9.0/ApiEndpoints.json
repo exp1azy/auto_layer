@@ -11,6 +11,86 @@
   },
   {
     "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "AddRange",
+    "RelativePath": "WeatherForecast/addrange",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Count",
+    "RelativePath": "WeatherForecast/count",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "CountWhere",
+    "RelativePath": "WeatherForecast/countwhere",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Exists",
+    "RelativePath": "WeatherForecast/exists",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Get",
+    "RelativePath": "WeatherForecast/get",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "GetOrdered",
+    "RelativePath": "WeatherForecast/getordered",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "GetPage",
+    "RelativePath": "WeatherForecast/getpage",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "GetWhere",
+    "RelativePath": "WeatherForecast/getwhere",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
     "Method": "Remove",
     "RelativePath": "WeatherForecast/remove",
     "HttpMethod": "GET",
@@ -21,8 +101,98 @@
   },
   {
     "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "RemoveById",
+    "RelativePath": "WeatherForecast/removebyid",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "RemoveRange",
+    "RelativePath": "WeatherForecast/removerange",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "RemoveWhere",
+    "RelativePath": "WeatherForecast/removewhere",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Sql",
+    "RelativePath": "WeatherForecast/sql",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "SqlCommand",
+    "RelativePath": "WeatherForecast/sqlcommand",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Transaction",
+    "RelativePath": "WeatherForecast/trans",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
     "Method": "Update",
     "RelativePath": "WeatherForecast/update",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "UpdateById",
+    "RelativePath": "WeatherForecast/updatebyid",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "UpdateRange",
+    "RelativePath": "WeatherForecast/updaterange",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "UpdateWhere",
+    "RelativePath": "WeatherForecast/updatewhere",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
