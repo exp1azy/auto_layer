@@ -9,259 +9,7 @@ namespace AutoLayer
     {
         private readonly DbContext _dbContext = dbContext;
 
-        #region Sync
-        public TEntity? GetById(int id)
-        {
-            if (id <= 0)
-                throw new NonPositiveIdException(Error.NonPositiveIdError);
-            
-            return _dbContext.Set<TEntity>().Find(id);
-        }
-
-        public IEnumerable<TEntity> GetAll(bool asNoTracking = true)
-        {
-            return asNoTracking ?
-                [.. _dbContext.Set<TEntity>().AsNoTracking()] :
-                [.. _dbContext.Set<TEntity>()];
-        }
-
-        public IEnumerable<TEntity> GetWhere(Func<TEntity, bool> predicate, bool asNoTracking = true)
-        {
-            return asNoTracking ?
-                [.. _dbContext.Set<TEntity>().AsNoTracking().Where(predicate)] :
-                [.. _dbContext.Set<TEntity>().Where(predicate)];
-        }
-
-        public bool Exists(Func<TEntity, bool> predicate)
-        {
-            return _dbContext.Set<TEntity>().Any(predicate);
-        }
-
-        public int Count()
-        {
-            return _dbContext.Set<TEntity>().Count();
-        }
-
-        public int CountWhere(Func<TEntity, bool> predicate)
-        {
-            return _dbContext.Set<TEntity>().Count(predicate);
-        }
-
-        public IQueryable<TEntity> GetQuery()
-        {
-            return _dbContext.Set<TEntity>().AsQueryable();
-        }
-
-        public IEnumerable<TEntity> GetOrdered(Func<TEntity, object> orderBy, bool isAscending = true, bool asNoTracking = true)
-        {
-            var entities = _dbContext.Set<TEntity>().AsQueryable();
-
-            if (asNoTracking)
-                entities = entities.AsNoTracking();
-
-            return isAscending ?
-                [.. entities.OrderBy(orderBy)] :
-                [.. entities.OrderByDescending(orderBy)];
-        }
-
-        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, object>? orderBy = null, bool isAscending = true, bool asNoTracking = true)
-        {
-            if (pageNumber <= 0 || pageSize <= 0)
-                throw new GetPageException(Error.GetPageError);
-
-            var entities = _dbContext.Set<TEntity>().AsQueryable();
-
-            if (asNoTracking)
-                entities = entities.AsNoTracking();
-
-            if (orderBy != null)
-            {
-                return isAscending ?
-                    [.. entities.OrderBy(orderBy).Skip((pageNumber - 1) * pageSize).Take(pageSize)] :
-                    [.. entities.OrderByDescending(orderBy).Skip((pageNumber - 1) * pageSize).Take(pageSize)];
-            }
-
-            return isAscending ?
-                [.. entities.Skip((pageNumber - 1) * pageSize).Take(pageSize)] :
-                [.. entities.OrderByDescending(x => x).Skip((pageNumber - 1) * pageSize).Take(pageSize)];
-        }
-
-        public IQueryable<TEntity> Include(Expression<Func<TEntity, object>> navigationPropertyPath)
-        {
-            return _dbContext.Set<TEntity>().Include(navigationPropertyPath);
-        }
-
-        public void Add(TEntity entityToAdd)
-        {
-            if (entityToAdd == null)
-                throw new NullEntityException(Error.NullEntityError, nameof(entityToAdd));
-
-            _dbContext.Set<TEntity>().Add(entityToAdd);
-            _dbContext.SaveChanges();
-        }
-
-        public void AddRange(IEnumerable<TEntity> entitiesToAdd)
-        {
-            if (entitiesToAdd == null || entitiesToAdd.Any(x => x == null))
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToAdd));
-
-            _dbContext.Set<TEntity>().AddRange(entitiesToAdd);
-            _dbContext.SaveChanges();
-        }
-
-        public void Update(TEntity entityToUpdate)
-        {
-            if (entityToUpdate == null)
-                throw new NullEntityException(Error.NullEntityError, nameof(entityToUpdate));
-
-            var keyValues = _dbContext.Model.FindEntityType(typeof(TEntity))?
-                .FindPrimaryKey()?
-                .Properties
-                .Select(p => p.PropertyInfo?.GetValue(entityToUpdate))
-                .ToArray();
-
-            if (keyValues == null || keyValues.Any(k => k == null))
-                throw new NullPrimaryKeyException(Error.NullPrimaryKeyError, nameof(entityToUpdate));
-
-            var entity = _dbContext.Set<TEntity>().Find(keyValues)
-                ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToUpdate));
-
-            _dbContext.Entry(entity).CurrentValues.SetValues(entityToUpdate);
-            _dbContext.SaveChanges();
-        }
-
-        public void UpdateById(int id, Action<TEntity> updateAction)
-        {
-            if (id <= 0)
-                throw new NonPositiveIdException(Error.NonPositiveIdError);
-
-            var entityToUpdate = _dbContext.Set<TEntity>().Find(id);
-            if (entityToUpdate == null)
-                throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToUpdate));
-
-            updateAction(entityToUpdate);
-            _dbContext.SaveChanges();
-        }
-
-        public void UpdateRange(IEnumerable<TEntity> entitiesToUpdate)
-        {
-            if (entitiesToUpdate == null || !entitiesToUpdate.Any())
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToUpdate));
-
-            if (entitiesToUpdate.Any(x => x == null))
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToUpdate));
-
-            var primaryKeyProperties = _dbContext.Model.FindEntityType(typeof(TEntity))?
-                .FindPrimaryKey()?
-                .Properties
-                .Select(p => p.PropertyInfo)
-                .ToArray();
-
-            if (primaryKeyProperties == null || primaryKeyProperties.Length == 0)
-                throw new InvalidOperationException($"Entity {typeof(TEntity).Name} does not have a primary key defined.");
-
-            foreach (var entity in entitiesToUpdate)
-            {
-                var keyValues = primaryKeyProperties
-                    .Select(p => p.GetValue(entity))
-                    .ToArray();
-
-                if (keyValues.Any(k => k == null))
-                    throw new ArgumentException("Primary key values cannot be null", nameof(entitiesToUpdate));
-
-                var existingEntity = _dbContext.Set<TEntity>().Find(keyValues)
-                    ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entity));
-
-                _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
-            }
-
-            _dbContext.SaveChanges();
-        }
-
-        public void UpdateWhere(Func<TEntity, bool> predicate, Action<TEntity> updateAction)
-        {
-            var entitiesToUpdate = _dbContext.Set<TEntity>().Where(predicate).ToList();
-
-            foreach (var entity in entitiesToUpdate)           
-                updateAction(entity);
-            
-            _dbContext.SaveChanges();
-        }
-
-        public void Remove(TEntity entityToRemove)
-        {
-            if (entityToRemove == null)
-                throw new NullEntityException(Error.NullEntityError, nameof(entityToRemove));
-
-            _dbContext.Set<TEntity>().Remove(entityToRemove);
-            _dbContext.SaveChanges();
-        }
-
-        public void RemoveById(int id)
-        {
-            if (id <= 0)
-                throw new NonPositiveIdException(Error.NonPositiveIdError);
-
-            var entityToRemove = _dbContext.Set<TEntity>().Find(id);
-            if (entityToRemove == null)
-                throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToRemove));
-
-            _dbContext.Set<TEntity>().Remove(entityToRemove);
-            _dbContext.SaveChanges();
-        }
-
-        public void RemoveRange(IEnumerable<TEntity> entitiesToRemove)
-        {
-            if (entitiesToRemove == null || entitiesToRemove.Any(x => x == null))
-                throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToRemove));
-
-            _dbContext.Set<TEntity>().RemoveRange(entitiesToRemove);
-            _dbContext.SaveChanges();
-        }
-
-        public void RemoveWhere(Func<TEntity, bool> predicate)
-        {
-            var entitiesToRemove = _dbContext.Set<TEntity>().Where(predicate).ToList();
-            _dbContext.Set<TEntity>().RemoveRange(entitiesToRemove);
-            _dbContext.SaveChanges();
-        }
-
-        public void ExecuteTransaction(Action action)
-        {
-            using var trans = _dbContext.Database.BeginTransaction();
-            try
-            {
-                action();
-                _dbContext.SaveChanges();
-                trans.Commit();
-            }
-            catch (Exception ex)
-            {
-                trans.Rollback();
-                throw new TransactionException(Error.TransactionError, ex.Message);
-            }
-        }
-
-        public IEnumerable<TEntity> ExecuteSqlRaw(string sqlQuery)
-        {
-            if (string.IsNullOrEmpty(sqlQuery))
-                throw new NullSqlQueryException(Error.NullSqlQueryError);
-
-            return _dbContext.Set<TEntity>().FromSqlRaw(sqlQuery).ToList() 
-                ?? throw new ExecuteSqlRawException(Error.ExecuteSqlRawError, sqlQuery);
-        }
-
-        public int ExecuteSqlRawCommand(string sqlQuery)
-        {
-            if (string.IsNullOrEmpty(sqlQuery))
-                throw new NullSqlQueryException(Error.NullSqlQueryError);
-
-            return _dbContext.Database.ExecuteSqlRaw(sqlQuery);
-        }
-        #endregion
-
-        #region Async
-        public async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
+        private async Task<TEntity?> ProcessGetById(int id, CancellationToken cancellationToken = default)
         {
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
@@ -269,29 +17,74 @@ namespace AutoLayer
             return await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<TEntity>> ProcessGetAll(bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
             return asNoTracking ?
-                await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync(cancellationToken) :
-                await _dbContext.Set<TEntity>().ToListAsync(cancellationToken);
+                    await _dbContext.Set<TEntity>().AsNoTracking().ToListAsync(cancellationToken) :
+                    await _dbContext.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        private async Task<bool> ProcessExists(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
         }
 
-        public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<TEntity>> ProcessGetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            var query = asNoTracking
+                ? _dbContext.Set<TEntity>().AsNoTracking().Where(predicate)
+                : _dbContext.Set<TEntity>().Where(predicate);
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        private async Task<IEnumerable<TEntity>> ProcessGetOrdered(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            var query = _dbContext.Set<TEntity>().AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            query = isAscending
+                ? query.OrderBy(orderBy)
+                : query.OrderByDescending(orderBy);
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        private async Task<int> ProcessCount(CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>().CountAsync(cancellationToken);
         }
 
-        public async Task<int> CountWhereAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+        private async Task<int> ProcessCountWhere(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>().CountAsync(predicate, cancellationToken);
         }
 
-        public async Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<TEntity>> ProcessGetPaged(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            if (pageNumber <= 0 || pageSize <= 0)
+                throw new GetPageException(Error.GetPageError);
+
+            var query = _dbContext.Set<TEntity>().AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (orderBy != null)
+            {
+                query = isAscending
+                    ? query.OrderBy(orderBy)
+                    : query.OrderByDescending(orderBy);
+            }
+
+            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            return await query.ToListAsync(cancellationToken);
+        }
+
+        private async Task ProcessAdd(TEntity entityToAdd, CancellationToken cancellationToken = default)
         {
             if (entityToAdd == null)
                 throw new NullEntityException(Error.NullEntityError, typeof(TEntity).Name);
@@ -300,7 +93,7 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task AddRangeAsync(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default)
+        private async Task ProcessAddRange(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default)
         {
             if (entitiesToAdd == null || entitiesToAdd.Any(x => x == null))
                 throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, typeof(TEntity).Name);
@@ -309,7 +102,7 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(TEntity entityToUpdate, CancellationToken cancellationToken = default)
+        private async Task ProcessUpdate(TEntity entityToUpdate, CancellationToken cancellationToken = default)
         {
             if (entityToUpdate == null)
                 throw new NullEntityException(Error.NullEntityError, typeof(TEntity).Name);
@@ -330,19 +123,19 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateByIdAsync(int id, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
+        private async Task ProcessUpdateById(int id, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
         {
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
 
-            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken) 
+            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken: cancellationToken)
                 ?? throw new EntityNotFoundException(Error.EntityNotFoundError, typeof(TEntity).Name);
 
             updateAction(entityToUpdate);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateRangeAsync(IEnumerable<TEntity> entitiesToUpdate, CancellationToken cancellationToken = default)
+        private async Task ProcessUpdateRange(IEnumerable<TEntity> entitiesToUpdate, CancellationToken cancellationToken = default)
         {
             if (entitiesToUpdate == null || !entitiesToUpdate.Any())
                 throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, typeof(IEnumerable<TEntity>).Name);
@@ -366,9 +159,9 @@ namespace AutoLayer
                     .ToArray();
 
                 if (keyValues.Any(k => k == null))
-                    throw new ArgumentException("Primary key values cannot be null", typeof(IEnumerable<TEntity>).Name);
+                    throw new NullPrimaryKeyException(Error.NullPrimaryKeyError, typeof(TEntity).Name);
 
-                var existingEntity = await _dbContext.Set<TEntity>().FindAsync(keyValues, cancellationToken) 
+                var existingEntity = await _dbContext.Set<TEntity>().FindAsync(keyValues, cancellationToken)
                     ?? throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entity));
 
                 _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
@@ -377,7 +170,7 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateWhereAsync(Func<TEntity, bool> predicate, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
+        private async Task ProcessUpdateWhere(Func<TEntity, bool> predicate, Action<TEntity> updateAction, CancellationToken cancellationToken = default)
         {
             var entitiesToUpdate = _dbContext.Set<TEntity>().Where(predicate).ToList();
 
@@ -387,7 +180,7 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task RemoveAsync(TEntity entityToRemove, CancellationToken cancellationToken = default)
+        private async Task ProcessRemove(TEntity entityToRemove, CancellationToken cancellationToken = default)
         {
             if (entityToRemove == null)
                 throw new NullEntityException(Error.NullEntityError, nameof(entityToRemove));
@@ -396,12 +189,12 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task RemoveByIdAsync(int id, CancellationToken cancellationToken = default)
+        private async Task ProcessRemoveById(int id, CancellationToken cancellationToken = default)
         {
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
 
-            var entityToRemove = await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken);
+            var entityToRemove = await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken: cancellationToken);
             if (entityToRemove == null)
                 throw new EntityNotFoundException(Error.EntityNotFoundError, nameof(entityToRemove));
 
@@ -409,7 +202,7 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task RemoveRangeAsync(IEnumerable<TEntity> entitiesToRemove, CancellationToken cancellationToken = default)
+        private async Task ProcessRemoveRange(IEnumerable<TEntity> entitiesToRemove, CancellationToken cancellationToken = default)
         {
             if (entitiesToRemove == null || entitiesToRemove.Any(x => x == null))
                 throw new NullEntityInCollectionException(Error.NullEntityInCollectionError, nameof(entitiesToRemove));
@@ -418,14 +211,14 @@ namespace AutoLayer
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task RemoveWhereAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default)
+        private async Task ProcessRemoveWhere(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default)
         {
             var entitiesToRemove = _dbContext.Set<TEntity>().Where(predicate).ToList();
             _dbContext.Set<TEntity>().RemoveRange(entitiesToRemove);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task ExecuteTransactionAsync(Func<Task> action, CancellationToken cancellationToken = default)
+        private async Task ProcessTransactExecution(Func<Task> action, CancellationToken cancellationToken = default)
         {
             using var trans = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
             try
@@ -441,7 +234,7 @@ namespace AutoLayer
             }
         }
 
-        public async Task<IEnumerable<TEntity>> ExecuteSqlRawAsync(string sqlQuery, CancellationToken cancellationToken = default)
+        private async Task<IEnumerable<TEntity>> ProcessSqlRawExecution(string sqlQuery, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(sqlQuery))
                 throw new NullSqlQueryException(Error.NullSqlQueryError);
@@ -450,7 +243,7 @@ namespace AutoLayer
                 ?? throw new ExecuteSqlRawException(Error.ExecuteSqlRawError, sqlQuery);
         }
 
-        public async Task<int> ExecuteSqlRawCommandAsync(string sqlQuery, CancellationToken cancellationToken = default)
+        private async Task<int> ProcessSqlRawCommandExecution(string sqlQuery, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(sqlQuery))
                 throw new NullSqlQueryException(Error.NullSqlQueryError);
@@ -458,50 +251,144 @@ namespace AutoLayer
             return await _dbContext.Database.ExecuteSqlRawAsync(sqlQuery, cancellationToken);
         }
 
-        public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            var query = asNoTracking
-                ? _dbContext.Set<TEntity>().AsNoTracking().Where(predicate)
-                : _dbContext.Set<TEntity>().Where(predicate);
+        #region Sync
 
-            return await query.ToListAsync(cancellationToken);
-        }
+        public TEntity? GetById(int id) => 
+            ProcessGetById(id).GetAwaiter().GetResult();
 
-        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            var query = _dbContext.Set<TEntity>().AsQueryable();
+        public IEnumerable<TEntity> GetAll(bool asNoTracking = true) =>
+            ProcessGetAll(asNoTracking).GetAwaiter().GetResult();
 
-            if (asNoTracking)
-                query = query.AsNoTracking();
+        public IEnumerable<TEntity> GetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true) =>
+            ProcessGetWhere(predicate, asNoTracking).GetAwaiter().GetResult();
 
-            query = isAscending
-                ? query.OrderBy(orderBy)
-                : query.OrderByDescending(orderBy);
+        public bool Exists(Expression<Func<TEntity, bool>> predicate) =>
+            ProcessExists(predicate).GetAwaiter().GetResult();
 
-            return await query.ToListAsync(cancellationToken);
-        }
+        public int Count() =>
+            ProcessCount().GetAwaiter().GetResult();
 
-        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
-        {
-            if (pageNumber <= 0 || pageSize <= 0)
-                throw new GetPageException(Error.GetPageError);
+        public int CountWhere(Expression<Func<TEntity, bool>> predicate) =>
+            ProcessCountWhere(predicate).GetAwaiter().GetResult();
 
-            var query = _dbContext.Set<TEntity>().AsQueryable();
+        public IQueryable<TEntity> GetQuery() =>
+            _dbContext.Set<TEntity>().AsQueryable();
 
-            if (asNoTracking)
-                query = query.AsNoTracking();
+        public IEnumerable<TEntity> GetOrdered(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true) =>
+            ProcessGetOrdered(orderBy, isAscending, asNoTracking).GetAwaiter().GetResult();
 
-            if (orderBy != null)
-            {
-                query = (IQueryable<TEntity>)(isAscending
-                    ? query.OrderBy(orderBy)
-                    : query.OrderByDescending(orderBy));
-            }
+        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true) =>
+            ProcessGetPaged(pageNumber, pageSize, orderBy, isAscending, asNoTracking).GetAwaiter().GetResult();
 
-            query = query.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+        public IQueryable<TEntity> Include(Expression<Func<TEntity, object>> navigationPropertyPath) =>
+            _dbContext.Set<TEntity>().Include(navigationPropertyPath);
 
-            return await query.ToListAsync(cancellationToken);
-        }
+        public void Add(TEntity entityToAdd) =>
+            ProcessAdd(entityToAdd).GetAwaiter().GetResult();
+
+        public void AddRange(IEnumerable<TEntity> entitiesToAdd) =>
+            ProcessAddRange(entitiesToAdd).GetAwaiter().GetResult();
+
+        public void Update(TEntity entityToUpdate) =>
+            ProcessUpdate(entityToUpdate).GetAwaiter().GetResult();
+
+        public void UpdateById(int id, Action<TEntity> updateAction) =>
+            ProcessUpdateById(id, updateAction).GetAwaiter().GetResult();
+
+        public void UpdateRange(IEnumerable<TEntity> entitiesToUpdate) =>
+            ProcessUpdateRange(entitiesToUpdate).GetAwaiter().GetResult();
+
+        public void UpdateWhere(Func<TEntity, bool> predicate, Action<TEntity> updateAction) =>
+            ProcessUpdateWhere(predicate, updateAction).GetAwaiter().GetResult();
+
+        public void Remove(TEntity entityToRemove) =>
+            ProcessRemove(entityToRemove).GetAwaiter().GetResult();
+
+        public void RemoveById(int id) =>
+            ProcessRemoveById(id).GetAwaiter().GetResult();
+
+        public void RemoveRange(IEnumerable<TEntity> entitiesToRemove) =>
+            ProcessRemoveRange(entitiesToRemove).GetAwaiter().GetResult();
+
+        public void RemoveWhere(Func<TEntity, bool> predicate) =>
+            ProcessRemoveWhere(predicate).GetAwaiter().GetResult();
+
+        public void ExecuteTransaction(Func<Task> action) =>
+            ProcessTransactExecution(action).GetAwaiter().GetResult();
+
+        public IEnumerable<TEntity> ExecuteSqlRaw(string sqlQuery) =>
+            ProcessSqlRawExecution(sqlQuery).GetAwaiter().GetResult();
+
+        public int ExecuteSqlRawCommand(string sqlQuery) =>
+            ProcessSqlRawCommandExecution(sqlQuery).GetAwaiter().GetResult();
+
+        #endregion
+
+        #region Async
+
+        public async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default) =>
+            await ProcessGetById(id, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetAll(asNoTracking, cancellationToken);
+
+        public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+            await ProcessExists(predicate, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetWhere(predicate, asNoTracking, cancellationToken);
+
+        public async Task<int> CountAsync(CancellationToken cancellationToken = default) =>
+            await ProcessCount(cancellationToken);
+
+        public async Task<int> CountWhereAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
+            await ProcessCountWhere(predicate, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetOrdered(orderBy, isAscending, asNoTracking, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetPaged(pageNumber, pageSize, orderBy, isAscending, asNoTracking, cancellationToken);
+
+        public async Task AddAsync(TEntity entityToAdd, CancellationToken cancellationToken = default) =>
+            await ProcessAdd(entityToAdd, cancellationToken);
+
+        public async Task AddRangeAsync(IEnumerable<TEntity> entitiesToAdd, CancellationToken cancellationToken = default) =>
+            await ProcessAddRange(entitiesToAdd, cancellationToken);
+
+        public async Task UpdateAsync(TEntity entityToUpdate, CancellationToken cancellationToken = default) =>
+            await ProcessUpdate(entityToUpdate, cancellationToken);
+
+        public async Task UpdateByIdAsync(int id, Action<TEntity> updateAction, CancellationToken cancellationToken = default) =>
+            await ProcessUpdateById(id, updateAction, cancellationToken);
+
+        public async Task UpdateRangeAsync(IEnumerable<TEntity> entitiesToUpdate, CancellationToken cancellationToken = default) =>
+            await ProcessUpdateRange(entitiesToUpdate, cancellationToken);
+
+        public async Task UpdateWhereAsync(Func<TEntity, bool> predicate, Action<TEntity> updateAction, CancellationToken cancellationToken = default) =>
+            await ProcessUpdateWhere(predicate, updateAction, cancellationToken);
+
+        public async Task RemoveAsync(TEntity entityToRemove, CancellationToken cancellationToken = default) =>
+            await ProcessRemove(entityToRemove, cancellationToken);
+
+        public async Task RemoveByIdAsync(int id, CancellationToken cancellationToken = default) =>
+            await ProcessRemoveById(id, cancellationToken);
+
+        public async Task RemoveRangeAsync(IEnumerable<TEntity> entitiesToRemove, CancellationToken cancellationToken = default) =>
+            await ProcessRemoveRange(entitiesToRemove, cancellationToken);
+
+        public async Task RemoveWhereAsync(Func<TEntity, bool> predicate, CancellationToken cancellationToken = default) =>
+            await ProcessRemoveWhere(predicate, cancellationToken);
+
+        public async Task ExecuteTransactionAsync(Func<Task> action, CancellationToken cancellationToken = default) =>
+            await ProcessTransactExecution(action, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> ExecuteSqlRawAsync(string sqlQuery, CancellationToken cancellationToken = default) =>
+            await ProcessSqlRawExecution(sqlQuery, cancellationToken);
+
+        public async Task<int> ExecuteSqlRawCommandAsync(string sqlQuery, CancellationToken cancellationToken = default) =>
+            await ProcessSqlRawCommandExecution(sqlQuery, cancellationToken);
+
         #endregion
     }
 }

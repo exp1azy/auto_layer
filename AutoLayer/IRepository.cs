@@ -7,13 +7,13 @@ namespace AutoLayer
         #region Sync
         public TEntity? GetById(int id);
         public IEnumerable<TEntity> GetAll(bool asNoTracking = true);
-        public IEnumerable<TEntity> GetWhere(Func<TEntity, bool> predicate, bool asNoTracking = true);
-        public bool Exists(Func<TEntity, bool> predicate);
+        public IEnumerable<TEntity> GetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true);
+        public bool Exists(Expression<Func<TEntity, bool>> predicate);
         public int Count();
-        public int CountWhere(Func<TEntity, bool> predicate);
+        public int CountWhere(Expression<Func<TEntity, bool>> predicate);
         public IQueryable<TEntity> GetQuery();
-        public IEnumerable<TEntity> GetOrdered(Func<TEntity, object> orderBy, bool isAscending = true, bool asNoTracking = true);
-        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Func<TEntity, object>? orderBy = null, bool isAscending = true, bool asNoTracking = true);
+        public IEnumerable<TEntity> GetOrdered(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true);
+        public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true);
         public void Add(TEntity entityToAdd);
         public void AddRange(IEnumerable<TEntity> entitiesToAdd);
         public void Update(TEntity entityToUpdate);
@@ -24,7 +24,7 @@ namespace AutoLayer
         public void RemoveById(int id);
         public void RemoveRange(IEnumerable<TEntity> entitiesToRemove);
         public void RemoveWhere(Func<TEntity, bool> predicate);
-        public void ExecuteTransaction(Action action);
+        public void ExecuteTransaction(Func<Task> action);
         public IEnumerable<TEntity> ExecuteSqlRaw(string sqlQuery);
         public int ExecuteSqlRawCommand(string sqlQuery);
         #endregion
