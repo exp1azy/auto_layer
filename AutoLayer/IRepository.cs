@@ -7,6 +7,7 @@ namespace AutoLayer
         #region Sync
         public TEntity? GetById(int id);
         public IEnumerable<TEntity> GetAll(bool asNoTracking = true);
+        public TEntity? GetFirst(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true);
         public IEnumerable<TEntity> GetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true);
         public TEntity? GetFirstWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true);
         public IEnumerable<TEntity> GetWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true);
@@ -43,6 +44,7 @@ namespace AutoLayer
         #region Async
         public Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
         public Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default);
+        public Task<TEntity?> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
         public Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default);
         public Task<TEntity?> GetFirstWithRelatedAsync<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default);
         public Task<IEnumerable<TEntity>> GetWithRelatedAsync<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default);

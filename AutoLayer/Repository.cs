@@ -48,6 +48,13 @@ namespace AutoLayer
             return await _dbContext.Set<TEntity>().AnyAsync(cancellationToken);
         }
 
+        private async Task<TEntity?> ProcessGetFirst(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            return asNoTracking
+                ? await _dbContext.Set<TEntity>().AsNoTracking().FirstOrDefaultAsync(predicate, cancellationToken)
+                : await _dbContext.Set<TEntity>().FirstOrDefaultAsync(predicate, cancellationToken);
+        }
+
         private async Task<IEnumerable<TEntity>> ProcessGetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
         {
             var query = asNoTracking
@@ -318,6 +325,9 @@ namespace AutoLayer
         public IEnumerable<TEntity> GetAll(bool asNoTracking = true) =>
             ProcessGetAll(asNoTracking).GetAwaiter().GetResult();
 
+        public TEntity? GetFirst(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true) =>
+            ProcessGetFirst(predicate, asNoTracking).GetAwaiter().GetResult();
+
         public IEnumerable<TEntity> GetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true) =>
             ProcessGetWhere(predicate, asNoTracking).GetAwaiter().GetResult();
 
@@ -420,6 +430,9 @@ namespace AutoLayer
 
         public async Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default) =>
             await ProcessGetAll(asNoTracking, cancellationToken);
+
+        public async Task<TEntity?> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetFirst(predicate, asNoTracking, cancellationToken);
 
         public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
             await ProcessGetWhere(predicate, asNoTracking, cancellationToken);
