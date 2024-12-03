@@ -5,7 +5,19 @@ namespace AutoLayer
 {
     public static class AutoMapper
     {
-        public static TModel MapToModel<TModel>(object entity) where TModel : class, new()
+        public static TModel MapToModel<TModel>(object entity) where TModel : class, new() =>
+            FromEntityToModel<TModel>(entity);
+
+        public static TEntity MapToEntity<TEntity>(object model) where TEntity : class, new() =>
+            FromModelToEntity<TEntity>(model);
+
+        public static List<TModel> MapToModelList<TModel>(List<object> entities) where TModel : class, new() => 
+            entities.Select(FromEntityToModel<TModel>).ToList();
+
+        public static List<TEntity> MapToEntityList<TEntity>(List<object> models) where TEntity : class, new() => 
+            models.Select(FromModelToEntity<TEntity>).ToList();
+
+        private static TModel FromEntityToModel<TModel>(object entity) where TModel : class, new()
         {
             if (entity == null)
                 throw new NullEntityException(nameof(entity));
@@ -16,7 +28,7 @@ namespace AutoLayer
 
             foreach (var modelProperty in modelProperties)
             {
-                var entityProperty = entityProperties.FirstOrDefault(p => p.Name == modelProperty.Name) 
+                var entityProperty = entityProperties.FirstOrDefault(p => p.Name == modelProperty.Name)
                     ?? throw new MapException(Error.EntityToModelError, entity.GetType().Name, typeof(TModel).Name);
 
                 if (modelProperty.PropertyType.IsAssignableFrom(entityProperty.PropertyType))
@@ -33,7 +45,7 @@ namespace AutoLayer
             return model;
         }
 
-        public static TEntity MapToEntity<TEntity>(object model) where TEntity : class, new()
+        private static TEntity FromModelToEntity<TEntity>(object model) where TEntity : class, new()
         {
             if (model == null)
                 throw new NullEntityException(nameof(model));
