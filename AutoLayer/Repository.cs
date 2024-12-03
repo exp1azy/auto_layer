@@ -24,9 +24,28 @@ namespace AutoLayer
                     await _dbContext.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
+        private async Task<TEntity?> ProcessGetFirstWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            return asNoTracking ?
+                await _dbContext.Set<TEntity>().AsNoTracking().Include(include).FirstOrDefaultAsync(condition, cancellationToken) :
+                await _dbContext.Set<TEntity>().Include(include).FirstOrDefaultAsync(condition, cancellationToken);
+        }
+
+        private async Task<IEnumerable<TEntity>> ProcessGetWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default)
+        {
+            return asNoTracking ?
+                await _dbContext.Set<TEntity>().AsNoTracking().Include(include).Where(condition).ToListAsync(cancellationToken) :
+                await _dbContext.Set<TEntity>().Include(include).Where(condition).ToListAsync(cancellationToken);
+        }
+
         private async Task<bool> ProcessExists(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>().AnyAsync(predicate, cancellationToken);
+        }
+
+        private async Task<bool> ProcessIsEmpty(CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().AnyAsync(cancellationToken);
         }
 
         private async Task<IEnumerable<TEntity>> ProcessGetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default)
@@ -60,6 +79,46 @@ namespace AutoLayer
         private async Task<int> ProcessCountWhere(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _dbContext.Set<TEntity>().CountAsync(predicate, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessMax(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().MaxAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessMaxWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().Where(predicate).MaxAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessMin(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().MinAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessMinWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().Where(predicate).MinAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessSum(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().SumAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessSumWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().Where(predicate).SumAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessAverage(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().AverageAsync(selector, cancellationToken);
+        }
+
+        private async Task<decimal> ProcessAverageWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default)
+        {
+            return await _dbContext.Set<TEntity>().Where(predicate).AverageAsync(selector, cancellationToken);
         }
 
         private async Task<IEnumerable<TEntity>> ProcessGetPaged(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default)
@@ -262,14 +321,47 @@ namespace AutoLayer
         public IEnumerable<TEntity> GetWhere(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true) =>
             ProcessGetWhere(predicate, asNoTracking).GetAwaiter().GetResult();
 
+        public TEntity? GetFirstWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true) =>
+            ProcessGetFirstWithRelated(condition, include, asNoTracking).GetAwaiter().GetResult();
+
+        public IEnumerable<TEntity> GetWithRelated<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true) =>
+            ProcessGetWithRelated(condition, include, asNoTracking).GetAwaiter().GetResult();
+
         public bool Exists(Expression<Func<TEntity, bool>> predicate) =>
             ProcessExists(predicate).GetAwaiter().GetResult();
+
+        public bool IsEmpty() =>
+            ProcessIsEmpty().GetAwaiter().GetResult();
 
         public int Count() =>
             ProcessCount().GetAwaiter().GetResult();
 
         public int CountWhere(Expression<Func<TEntity, bool>> predicate) =>
             ProcessCountWhere(predicate).GetAwaiter().GetResult();
+
+        public decimal Max(Expression<Func<TEntity, decimal>> selector) =>
+            ProcessMax(selector).GetAwaiter().GetResult();
+
+        public decimal MaxWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector) =>
+            ProcessMaxWhere(predicate, selector).GetAwaiter().GetResult();
+
+        public decimal Min(Expression<Func<TEntity, decimal>> selector) =>
+            ProcessMin(selector).GetAwaiter().GetResult();
+
+        public decimal MinWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector) =>
+            ProcessMinWhere(predicate, selector).GetAwaiter().GetResult();
+
+        public decimal Sum(Expression<Func<TEntity, decimal>> selector) =>
+            ProcessSum(selector).GetAwaiter().GetResult();
+
+        public decimal SumWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector) =>
+            ProcessSumWhere(predicate, selector).GetAwaiter().GetResult();
+
+        public decimal Average(Expression<Func<TEntity, decimal>> selector) =>
+            ProcessAverage(selector).GetAwaiter().GetResult();
+
+        public decimal AverageWhere(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector) =>
+            ProcessAverageWhere(predicate, selector).GetAwaiter().GetResult();
 
         public IQueryable<TEntity> GetQuery() =>
             _dbContext.Set<TEntity>().AsQueryable();
@@ -278,10 +370,7 @@ namespace AutoLayer
             ProcessGetOrdered(orderBy, isAscending, asNoTracking).GetAwaiter().GetResult();
 
         public IEnumerable<TEntity> GetPaged(int pageNumber, int pageSize, Expression<Func<TEntity, object>>? orderBy = null, bool isAscending = true, bool asNoTracking = true) =>
-            ProcessGetPaged(pageNumber, pageSize, orderBy, isAscending, asNoTracking).GetAwaiter().GetResult();
-
-        public IQueryable<TEntity> Include(Expression<Func<TEntity, object>> navigationPropertyPath) =>
-            _dbContext.Set<TEntity>().Include(navigationPropertyPath);
+            ProcessGetPaged(pageNumber, pageSize, orderBy, isAscending, asNoTracking).GetAwaiter().GetResult();      
 
         public void Add(TEntity entityToAdd) =>
             ProcessAdd(entityToAdd).GetAwaiter().GetResult();
@@ -332,17 +421,50 @@ namespace AutoLayer
         public async Task<IEnumerable<TEntity>> GetAllAsync(bool asNoTracking = true, CancellationToken cancellationToken = default) =>
             await ProcessGetAll(asNoTracking, cancellationToken);
 
+        public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetWhere(predicate, asNoTracking, cancellationToken);
+
+        public async Task<TEntity?> GetFirstWithRelatedAsync<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetFirstWithRelated(condition, include, asNoTracking, cancellationToken);
+
+        public async Task<IEnumerable<TEntity>> GetWithRelatedAsync<TProperty>(Expression<Func<TEntity, bool>> condition, Expression<Func<TEntity, TProperty>> include, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
+            await ProcessGetWithRelated(condition, include, asNoTracking, cancellationToken);
+
         public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
             await ProcessExists(predicate, cancellationToken);
 
-        public async Task<IEnumerable<TEntity>> GetWhereAsync(Expression<Func<TEntity, bool>> predicate, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
-            await ProcessGetWhere(predicate, asNoTracking, cancellationToken);
+        public async Task<bool> IsEmptyAsync(CancellationToken cancellationToken = default) =>
+            await ProcessIsEmpty(cancellationToken);
 
         public async Task<int> CountAsync(CancellationToken cancellationToken = default) =>
             await ProcessCount(cancellationToken);
 
         public async Task<int> CountWhereAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default) =>
             await ProcessCountWhere(predicate, cancellationToken);
+
+        public async Task<decimal> MaxAsync(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessMax(selector, cancellationToken);
+
+        public async Task<decimal> MaxWhereAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessMaxWhere(predicate, selector, cancellationToken);
+
+        public async Task<decimal> MinAsync(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessMin(selector, cancellationToken);
+
+        public async Task<decimal> MinWhereAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessMinWhere(predicate, selector, cancellationToken);
+
+        public async Task<decimal> SumAsync(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessSum(selector, cancellationToken);
+
+        public async Task<decimal> SumWhereAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessSumWhere(predicate, selector, cancellationToken);
+
+        public async Task<decimal> AverageAsync(Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessAverage(selector, cancellationToken);
+
+        public async Task<decimal> AverageWhereAsync(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, decimal>> selector, CancellationToken cancellationToken = default) =>
+            await ProcessAverageWhere(predicate, selector, cancellationToken);
 
         public async Task<IEnumerable<TEntity>> GetOrderedAsync(Expression<Func<TEntity, object>> orderBy, bool isAscending = true, bool asNoTracking = true, CancellationToken cancellationToken = default) =>
             await ProcessGetOrdered(orderBy, isAscending, asNoTracking, cancellationToken);
