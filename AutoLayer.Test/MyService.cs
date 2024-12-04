@@ -1,5 +1,4 @@
 ﻿using FakeLab;
-using System.Linq.Expressions;
 
 namespace AutoLayer.Test
 {
@@ -15,6 +14,13 @@ namespace AutoLayer.Test
             return AutoMapper.MapToModel<WeatherForecastModel>(entity);
         }
 
+        public async Task<WeatherForecastModel> GetFirstAsync()
+        {
+            var entity = await _repo.GetFirstAsync(w => w.Date.Year > 2020 && w.TemperatureC > 5);
+
+            return AutoMapper.MapToModel<WeatherForecastModel>(entity);
+        }
+
         public async Task<IEnumerable<WeatherForecastModel>> GetWhereAsync()
         {
             var entities = await _repo.GetWhereAsync(w => w.TemperatureC > 7);
@@ -22,18 +28,9 @@ namespace AutoLayer.Test
             return entities.Select(AutoMapper.MapToModel<WeatherForecastModel>);
         }
 
-        public async Task<IEnumerable<WeatherForecastModel>> GetOrderedAsync()
+        public async Task<bool> IsEmptyAsync()
         {
-            var entites = await _repo.GetOrderedAsync(w => w.TemperatureC);
-
-            return entites.Select(AutoMapper.MapToModel<WeatherForecastModel>);
-        }
-
-        public async Task<IEnumerable<WeatherForecastModel>> GetPagedAsync()
-        {
-            var entites = await _repo.GetPagedAsync(1, 10);
-
-            return entites.Select(AutoMapper.MapToModel<WeatherForecastModel>);
+            return await _repo.IsEmptyAsync();
         }
 
         public async Task<bool> ExistsAsync()
@@ -49,6 +46,30 @@ namespace AutoLayer.Test
         public async Task<int> CountWhereAsync()
         {
             return await _repo.CountWhereAsync(x => x.TemperatureC < 0);
+        }
+
+        public async Task<int> MaxAsync()
+        {
+            return (int)await _repo.MaxAsync(x => x.TemperatureC);
+        }
+
+        public async Task<int> MaxWhereAsync()
+        {
+            return (int)await _repo.MaxWhereAsync(x => x.TemperatureC < 0, x => x.TemperatureC);
+        }
+
+        public async Task<IEnumerable<WeatherForecastModel>> GetOrderedAsync()
+        {
+            var entites = await _repo.GetOrderedAsync(w => w.TemperatureC);
+
+            return entites.Select(AutoMapper.MapToModel<WeatherForecastModel>);
+        }
+
+        public async Task<IEnumerable<WeatherForecastModel>> GetPagedAsync()
+        {
+            var entites = await _repo.GetPagedAsync(1, 10);
+
+            return entites.Select(AutoMapper.MapToModel<WeatherForecastModel>);
         }
 
         public async Task AddAsync()

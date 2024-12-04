@@ -6,12 +6,18 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>AutoLayer</Title>
-    <Version>0.0.2</Version>
+    <Version>1.0.0</Version>
     <Authors>explazy</Authors>
     <PackageProjectUrl>https://github.com/exp1azy/auto_layer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/exp1azy/auto_layer</RepositoryUrl>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	<IncludeDocumentationFile>true</IncludeDocumentationFile>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<Description>The AutoLayer library is a high-performance, flexible, and extensible framework designed to simplify data access and management in your .NET applications. It replaces the traditional repository pattern and offers a wide range of features for interacting with your data models, making it an ideal solution for modern enterprise applications.
+
+With this library, you can manage CRUD operations, handle transactions, perform advanced queries without the need for repetitive boilerplate code. It supports asynchronous operations, enabling you to build responsive and scalable applications.</Description>
+	<PackageTags>repository;data-access;repository-pattern;unit-of-work;CRUD-operations;soft-delete;transaction-management;async-operations;batch-operations;LINQ;.NET;SQL;entity-framework;performance;scalable;clean-architecture;data-management;audit-tracking;versioning;raw-SQL;dependency-injection;database-operations;enterprise-application</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

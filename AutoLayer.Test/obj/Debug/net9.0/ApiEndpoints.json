@@ -51,6 +51,16 @@
   },
   {
     "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "First",
+    "RelativePath": "WeatherForecast/first",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
     "Method": "Get",
     "RelativePath": "WeatherForecast/get",
     "HttpMethod": "GET",
@@ -83,6 +93,26 @@
     "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
     "Method": "GetWhere",
     "RelativePath": "WeatherForecast/getwhere",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "Max",
+    "RelativePath": "WeatherForecast/max",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AutoLayer.Test.Controllers.WeatherForecastController",
+    "Method": "MaxWhere",
+    "RelativePath": "WeatherForecast/maxwhere",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

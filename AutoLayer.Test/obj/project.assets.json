@@ -310,7 +310,7 @@
           }
         }
       },
-      "AutoLayer/0.0.2": {
+      "AutoLayer/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
         "dependencies": {
@@ -783,7 +783,7 @@
         "postgresql.png"
       ]
     },
-    "AutoLayer/0.0.2": {
+    "AutoLayer/1.0.0": {
       "type": "project",
       "path": "../AutoLayer/AutoLayer.csproj",
       "msbuildProject": "../AutoLayer/AutoLayer.csproj"
@@ -791,7 +791,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
-      "AutoLayer >= 0.0.2",
+      "AutoLayer >= 1.0.0",
       "FakeLab >= 1.1.1",
       "Microsoft.AspNetCore.OpenApi >= 9.0.0",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.1"
@@ -843,7 +843,7 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
+        "auditMode": "direct"
       },
       "SdkAnalysisLevel": "9.0.100"
     },
@@ -883,7 +883,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

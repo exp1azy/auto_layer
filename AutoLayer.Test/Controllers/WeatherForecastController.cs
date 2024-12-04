@@ -14,6 +14,12 @@ namespace AutoLayer.Test.Controllers
             return Ok(await _myService.GetByIdAsync());
         }
 
+        [HttpGet("first")]
+        public async Task<IActionResult> First()
+        {
+            return Ok(await _myService.GetFirstAsync());
+        }
+
         [HttpGet("getwhere")]
         public async Task<IActionResult> GetWhere()
         {
@@ -48,6 +54,18 @@ namespace AutoLayer.Test.Controllers
         public async Task<IActionResult> CountWhere()
         {
             return Ok(await _myService.CountWhereAsync());
+        }
+
+        [HttpGet("max")]
+        public async Task<IActionResult> Max()
+        {
+            return Ok(await _myService.MaxAsync());
+        }
+
+        [HttpGet("maxwhere")]
+        public async Task<IActionResult> MaxWhere()
+        {
+            return Ok(await _myService.MaxWhereAsync());
         }
 
         [HttpGet("add")]
