@@ -41,3 +41,4 @@ D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\refint\AutoLayer.Test.dl
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.pdb
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.genruntimeconfig.cache
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\ref\AutoLayer.Test.dll
+D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\AutoLayer.xml

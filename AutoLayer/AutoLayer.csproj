@@ -18,7 +18,15 @@
 
 With this library, you can manage CRUD operations, handle transactions, perform advanced queries without the need for repetitive boilerplate code. It supports asynchronous operations, enabling you to build responsive and scalable applications.</Description>
 	<PackageTags>repository;data-access;repository-pattern;unit-of-work;CRUD-operations;soft-delete;transaction-management;async-operations;batch-operations;LINQ;.NET;SQL;entity-framework;performance;scalable;clean-architecture;data-management;audit-tracking;versioning;raw-SQL;dependency-injection;database-operations;enterprise-application</PackageTags>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
