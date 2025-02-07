@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class GetPageException(string error) : ErrorWithMessagesException(error)
+    public class GetPageException : ErrorWithMessagesException
     {
+        public GetPageException(string error) : base(error)
+        {
+        }
     }
 }

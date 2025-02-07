@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Title>AutoLayer</Title>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>explazy</Authors>
     <PackageProjectUrl>https://github.com/exp1azy/auto_layer</PackageProjectUrl>
     <RepositoryUrl>https://github.com/exp1azy/auto_layer</RepositoryUrl>
@@ -19,6 +19,7 @@
 With this library, you can manage CRUD operations, handle transactions, perform advanced queries without the need for repetitive boilerplate code. It supports asynchronous operations, enabling you to build responsive and scalable applications.</Description>
 	<PackageTags>repository;data-access;repository-pattern;unit-of-work;CRUD-operations;soft-delete;transaction-management;async-operations;batch-operations;LINQ;.NET;SQL;entity-framework;performance;scalable;clean-architecture;data-management;audit-tracking;versioning;raw-SQL;dependency-injection;database-operations;enterprise-application</PackageTags>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageReleaseNotes>Added support for .NET 8.0</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,8 +30,8 @@ With this library, you can manage CRUD operations, handle transactions, perform 
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,7 +50,7 @@ With this library, you can manage CRUD operations, handle transactions, perform 
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="LICENSE.txt">
+    <None Include="LICENSE.txt">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

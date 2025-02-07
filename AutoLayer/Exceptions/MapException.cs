@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class MapException(string error, params string[] messages) : ErrorWithMessagesException(error, messages)
+    public class MapException : ErrorWithMessagesException
     {
+        public MapException(string error, params string[] messages) : base(error, messages)
+        {
+        }
     }
 }

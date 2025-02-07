@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class NonPositiveIdException(string error) : ErrorWithMessagesException(error)
+    public class NonPositiveIdException : ErrorWithMessagesException
     {
+        public NonPositiveIdException(string error) : base(error)
+        {
+        }
     }
 }

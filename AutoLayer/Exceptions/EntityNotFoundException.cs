@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class EntityNotFoundException(string error, params string[] messages) : ErrorWithMessagesException(error, messages)
+    public class EntityNotFoundException : ErrorWithMessagesException
     {
+        public EntityNotFoundException(string error, params string[] messages) : base(error, messages)
+        {
+        }
     }
 }

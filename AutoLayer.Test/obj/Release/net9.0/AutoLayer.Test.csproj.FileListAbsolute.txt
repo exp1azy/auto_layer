@@ -16,6 +16,7 @@ D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\Npgsql.dll
 D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\AutoLayer.dll
 D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\AutoLayer.pdb
+D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\AutoLayer.xml
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.csproj.AssemblyReference.cache
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.GeneratedMSBuildEditorConfig.editorconfig
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.AssemblyInfoInputs.cache
@@ -41,4 +42,3 @@ D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\refint\AutoLayer.Test.dl
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.pdb
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\AutoLayer.Test.genruntimeconfig.cache
 D:\projects\AutoLayer\AutoLayer.Test\obj\Release\net9.0\ref\AutoLayer.Test.dll
-D:\projects\AutoLayer\AutoLayer.Test\bin\Release\net9.0\AutoLayer.xml

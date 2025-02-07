@@ -75,10 +75,10 @@
         </member>
         <member name="M:AutoLayer.Repository`1.#ctor(Microsoft.EntityFrameworkCore.DbContext)">
             <summary>
-            A generic repository class for performing CRUD operations and interacting with the database.
-            Provides a base implementation for working with entities in a given <see cref="T:Microsoft.EntityFrameworkCore.DbContext"/>.
+            Initializes a new instance of the <see cref="T:AutoLayer.Repository`1"/> class.
             </summary>
-            <typeparam name="TEntity">The type of the entity to operate on. Must be a reference type and have a parameterless constructor.</typeparam>
+            <param name="dbContext"></param>
+            <exception cref="T:System.ArgumentNullException"></exception>
         </member>
         <member name="M:AutoLayer.Repository`1.GetById(System.Int32)">
             <summary>

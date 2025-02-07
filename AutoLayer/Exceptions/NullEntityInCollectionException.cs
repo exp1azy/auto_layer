@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class NullEntityInCollectionException(string error, params string[] messages) : ErrorWithMessagesException(error, messages)
+    public class NullEntityInCollectionException : ErrorWithMessagesException
     {
+        public NullEntityInCollectionException(string error, params string[] messages) : base(error, messages)
+        {
+        }
     }
 }

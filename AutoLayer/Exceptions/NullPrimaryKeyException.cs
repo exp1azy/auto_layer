@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class NullPrimaryKeyException(string error, params string[] messages) : ErrorWithMessagesException(error, messages)
+    public class NullPrimaryKeyException : ErrorWithMessagesException
     {
+        public NullPrimaryKeyException(string error, params string[] messages) : base(error, messages)
+        {
+        }
     }
 }

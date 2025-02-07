@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AutoLayer.Test")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+59470d1f822b73731bb4cc8e5a8fbea331bc6dd8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7a3b25720382e35ed4a589da36dd6696234235a0")]
 [assembly: System.Reflection.AssemblyProductAttribute("AutoLayer.Test")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AutoLayer.Test")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

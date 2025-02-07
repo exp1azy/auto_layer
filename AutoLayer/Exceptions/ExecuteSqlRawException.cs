@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class ExecuteSqlRawException(string error, params string[] messages) : ErrorWithMessagesException(error, messages)
+    public class ExecuteSqlRawException : ErrorWithMessagesException
     {
+        public ExecuteSqlRawException(string error, params string[] messages) : base(error, messages)
+        {
+        }
     }
 }

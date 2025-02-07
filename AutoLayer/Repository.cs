@@ -10,16 +10,26 @@ namespace AutoLayer
     /// Provides a base implementation for working with entities in a given <see cref="DbContext"/>.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity to operate on. Must be a reference type and have a parameterless constructor.</typeparam>
-    public class Repository<TEntity>(DbContext dbContext) where TEntity : class, new()
+    public class Repository<TEntity> where TEntity : class, new()
     {
-        private readonly DbContext _dbContext = dbContext;
+        private readonly DbContext _dbContext;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Repository{TEntity}"/> class.
+        /// </summary>
+        /// <param name="dbContext"></param>
+        /// <exception cref="ArgumentNullException"></exception>
+        public Repository(DbContext dbContext)
+        {
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+        }
 
         private async Task<TEntity?> ProcessGetById(int id, CancellationToken cancellationToken = default)
         {
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
 
-            return await _dbContext.Set<TEntity>().FindAsync([ id ], cancellationToken: cancellationToken);
+            return await _dbContext.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken: cancellationToken);
         }
 
         private async Task<IEnumerable<TEntity>> ProcessGetAll(bool asNoTracking = true, CancellationToken cancellationToken = default)
@@ -199,7 +209,7 @@ namespace AutoLayer
             if (id <= 0)
                 throw new NonPositiveIdException(Error.NonPositiveIdError);
 
-            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync([id], cancellationToken: cancellationToken)
+            var entityToUpdate = await _dbContext.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken: cancellationToken)
                 ?? throw new EntityNotFoundException(Error.EntityNotFoundError, typeof(TEntity).Name);
 
             updateAction(entityToUpdate);

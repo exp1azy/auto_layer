@@ -1,6 +1,9 @@
 ﻿namespace AutoLayer.Exceptions
 {
-    public class ErrorWithMessagesException(string error, params string[] messages) : Exception(string.Format(error, messages))
+    public class ErrorWithMessagesException : Exception
     {
+        public ErrorWithMessagesException(string error, params string[] messages) : base(string.Format(error, messages))
+        {
+        }
     }
 }
